@@ -1,4 +1,4 @@
-﻿public class Program
+public class Program
 {
     public static void Main()
     {
@@ -23,6 +23,7 @@
         {
             return 0;
         }
+
         int left = 0, right = items.Count - 1, middle;
 
         while (right >= left)
@@ -51,6 +52,7 @@
         {
             return items.Count - 1;
         }
+        
         int left = 0, right = items.Count - 1, middle;
 
         while (right >= left)
