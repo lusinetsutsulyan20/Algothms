@@ -1,4 +1,4 @@
-﻿namespace MyclProgramNamespace
+namespace MyclProgramNamespace
 {
     public class Program
     {
@@ -25,14 +25,13 @@
             {
                 return middle;
             }
-            else if (target.CompareTo(items[middle]) < 0)
+            if (target.CompareTo(items[middle]) < 0)
             {
                 return MyBinarySearch<T>(items, target, left, middle - 1);
             }
-            else 
-            {
-                return MyBinarySearch<T>(items, target, middle + 1, right);
-            }
+
+            return MyBinarySearch<T>(items, target, middle + 1, right);
+            
         }
     }
 }
