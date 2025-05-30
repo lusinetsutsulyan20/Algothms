@@ -20,11 +20,14 @@ namespace MyclProgramNamespace
             {
                 return -1;
             }
-            int middle = left + ((right - left) / 2);
+
+            int middle = left + (right - left) / 2;
+
             if (target.CompareTo(items[middle]) == 0)
             {
                 return middle;
             }
+            
             if (target.CompareTo(items[middle]) < 0)
             {
                 return MyBinarySearch<T>(items, target, left, middle - 1);
