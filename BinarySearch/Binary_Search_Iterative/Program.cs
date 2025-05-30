@@ -36,7 +36,7 @@ namespace ProgramNamespace
                 {
                     return middle;
                 }
-                else if (target.CompareTo(items[middle]) < 0)
+                if (target.CompareTo(items[middle]) < 0)
                 {
                     right = middle - 1;
                 }
