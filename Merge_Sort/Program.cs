@@ -1,4 +1,4 @@
-﻿public class Program
+public class Program
 {
     public static void Main()
     {
@@ -23,11 +23,11 @@
         }
     }
 
-    public static void Merge_Sort<T>(List<T> items, int left, int right) where T:IComparable
+    public static void Merge_Sort<T>(List<T> items, int left, int right) where T : IComparable
     {
         if (left >= right) return;
 
-        int middle = right + (right - left) / 2;
+        int middle = left + (right - left) / 2;
 
         Merge_Sort<T>(items, left, middle);
         Merge_Sort<T>(items, middle + 1, right);
@@ -43,7 +43,7 @@
 
         while (left1 <= right1 && left2 <= right2)
         {
-            if (items[left1].CompareTo(items[left2]) < 0)
+            if (items[left1].CompareTo(items[left2]) <= 0)
             {
                 tmp.Add(items[left1]);
                 ++left1;
