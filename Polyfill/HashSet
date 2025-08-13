@@ -1,0 +1,151 @@
+namespace HashSEtNamespace
+{
+    public class HashSet
+    {
+        private LinkedList<int>[] _items;
+        private int _capacity = 11;
+        private int _count;
+        private const float treshold = 0.75f;
+
+
+        public HashSet()
+        {
+            _items = new LinkedList<int>[_capacity];
+            for (int i = 0; i < _capacity; i++)
+            {
+                _items[i] = new LinkedList<int>();
+            }
+        }
+
+
+
+        public bool Contains(int key)
+        {
+            int slot = Hashing(key);
+            if (_items[slot] == null) return false;
+
+            foreach (var item in _items[slot])
+            {
+                if (item.Equals(key)) return true;
+            }
+
+            return false;
+        }
+
+
+        public void Add(int key)
+        {
+            if (Contains(key))
+                throw new ArgumentException($"An item with the same key '{key}' already exists.");
+
+            if (GetLoadFactor() > treshold) ReHash();
+
+            int hash = Hashing(key);
+            _items[hash].AddFirst(key);
+            ++_count;
+        }
+
+
+        public void Remove(int key)
+        {
+            int hash = Hashing(key);
+            var list = _items[hash];
+
+            if (list == null || list.Count == 0)
+                throw new KeyNotFoundException($"The given key '{key}' was not present in the hashset.");
+
+
+            var node = list.First;
+            while (node != null)
+            {
+                if (node.Value.Equals(key))
+                {
+                    list.Remove(node);
+                    _count--;
+                    return;
+                }
+                node = node.Next;
+            }
+
+            throw new KeyNotFoundException($"The given key '{key}' was not present in the hashset.");
+        }
+
+
+
+
+
+        // private methods
+        private float GetLoadFactor()
+        {
+            return (float)_count / _capacity;
+        }
+
+
+        private int Hashing(int key)
+        {
+            return Math.Abs(HashFunction(key) % _capacity);
+        }
+
+
+        public static int HashFunction(int key)
+        {
+            uint ukey = (uint)key;
+            ukey = ((ukey >> 16) ^ ukey) * 0x45d9f3bu;
+            ukey = ((ukey >> 16) ^ ukey) * 0x45d9f3bu;
+            ukey = (ukey >> 16) ^ ukey;
+            return (int)ukey;
+        }   
+
+
+
+        private void ReHash()
+        {
+            _capacity = FindNextPrime(_capacity * 2);
+            var tmp = new LinkedList<int>[_capacity];
+
+            for (int i = 0; i < _capacity; i++)
+            {
+                tmp[i] = new LinkedList<int>();
+            }
+
+            foreach (var list in _items)
+            {
+                foreach (var item in list)
+                {
+                    int hash = Hashing(item);
+                    tmp[hash].AddFirst(item);
+                }
+            }
+            _items = tmp;
+        }
+
+
+
+        private int FindNextPrime(int n)
+        {
+            int limit = Math.Max(2 * n, n + 100);
+
+            bool[] isPrime = new bool[limit + 1];
+            for (int i = 2; i <= limit; i++)
+                isPrime[i] = true;
+
+            for (int i = 2; i * i <= limit; i++)
+            {
+                if (isPrime[i])
+                {
+                    for (int j = i * i; j <= limit; j += i)
+                    {
+                        isPrime[j] = false;
+                    }
+                }
+            }
+
+            for (int i = n; i <= limit; i++)
+            {
+                if (isPrime[i])
+                    return i;
+            }
+            return n * 2;
+        }
+    }
+}
