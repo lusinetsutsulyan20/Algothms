@@ -1,0 +1,197 @@
+namespace HashMapNamespace
+{
+    using PairNamespace;
+    
+    public class HashMap<TKey, TValue> where TKey : IComparable<TKey>
+    {
+        private LinkedList<KeyValuePair<string, TValue>>[] _items;
+        private int _capacity = 11;
+        private int _count;
+        private const float treshold = 0.75f;
+
+
+        public HashMap()
+        {
+            _items = new LinkedList<KeyValuePair<string, TValue>>[_capacity];
+            for (int i = 0; i < _capacity; i++)
+            {
+                _items[i] = new LinkedList<KeyValuePair<string, TValue>>();
+            }
+        }
+
+
+
+        public TValue this[string key]
+        {
+            get
+            {
+                int hash = Hashing(key);
+                foreach (var item in _items[hash])
+                {
+                    if (item.Key.CompareTo(key) == 0)
+                        return item.Value;
+                }
+
+                throw new KeyNotFoundException($"The given key '{key}' was not present in the dictionary.");
+            }
+            set
+            {
+                int hash = Hashing(key);
+
+                foreach (var item in _items[hash])
+                {
+                    if (item.Key.CompareTo(key) == 0)
+                    {
+                        item.Value = value;
+                        return;
+                    }
+                }
+
+                _items[hash].AddFirst(new KeyValuePair<string, TValue>(key, value));
+                _count++;
+            }
+        }
+
+
+
+        public void Add(string key, TValue value)
+        {
+            if (ContainsKey(key))
+                throw new ArgumentException($"An item with the same key '{key}' already exists.");
+
+            if (GetLoadFactor() > treshold) ReHash();
+
+            int hash = Hashing(key);
+            var tmp = new KeyValuePair<string, TValue>(key, value);
+            _items[hash].AddFirst(tmp);
+            ++_count;
+        }
+
+
+
+        public bool Remove(string key)
+        {
+            int hash = Hashing(key);
+            var list = _items[hash];
+
+            if (list == null || list.Count == 0)
+                throw new KeyNotFoundException($"The given key '{key}' was not present in the dictionary.");
+
+
+            var node = list.First;
+            while (node != null)
+            {
+                if (node.Value.Key.Equals(key))
+                {
+                    list.Remove(node);
+                    _count--;
+                    return true;
+                }
+                node = node.Next;
+            }
+
+            return false;
+        }
+
+
+
+        public bool ContainsKey(string key)
+        {
+            int slot = Hashing(key);
+            if (_items[slot] == null) return false;
+
+            foreach (var item in _items[slot])
+            {
+                if (item.Key.Equals(key)) return true;
+            }
+
+            return false;
+        }
+
+
+
+        // private methods
+        private float GetLoadFactor()
+        {
+            return (float)_count / _capacity;
+        }
+
+
+        private int Hashing(string str)
+        {
+            return Math.Abs(HashFunction(str) % _capacity);
+        }
+
+
+
+        // FNV-1a hash (Fowler–Noll–Vo variant 1a).
+        private int HashFunction(string str)
+        {
+            const uint FNV_prime = 16777619;
+            const uint offset_basis = 2166136261;
+
+            uint hash = offset_basis;
+
+            foreach (char c in str)
+            {
+                hash ^= c;
+                hash *= FNV_prime;
+            }
+
+            return unchecked((int)hash);
+        }
+
+
+
+        private void ReHash()
+        {
+            _capacity = FindNextPrime(_capacity * 2);
+            var tmp = new LinkedList<KeyValuePair<string, TValue>>[_capacity];
+
+            for (int i = 0; i < _capacity; i++)
+            {
+                tmp[i] = new LinkedList<KeyValuePair<string, TValue>>();
+            }
+
+            foreach (var list in _items)
+            {
+                foreach (var item in list)
+                {
+                    int hash = Hashing(item.Key);
+                    tmp[hash].AddFirst(item);
+                }
+            }
+            _items = tmp;
+        }
+
+
+
+
+        private int FindNextPrime(int n)
+        {
+            int limit = Math.Max(2 * n, n + 100);
+
+            bool[] isPrime = new bool[limit + 1];
+            for (int i = 2; i <= limit; i++)
+                isPrime[i] = true;
+
+            for (int i = 2; i * i <= limit; i++)
+            {
+                if (isPrime[i])
+                {
+                    for (int j = i * i; j <= limit; j += i)
+                    {
+                        isPrime[j] = false;
+                    }
+                }
+            }
+
+            for (int i = n; i <= limit; i++)
+            {
+                if (isPrime[i])
+                    return i;
+            }
+            return n * 2;
+        }
+    }
+}
